@@ -68,10 +68,29 @@ def t2_convert(in_path):
 
 		# raw = f.read()
 
-		print(f"Image dimens: {width}x{height}")
-		if width % 8:
-			width += 8-width%8
-		print(f"Image dimens corrected: {width}x{height}")
+		if t1 == 81: #'Q'
+			palette_size = 16 #4bpp
+			width_align = 16
+		elif t1 == 83: #'S'
+			palette_size = 256 #8bpp
+			width_align = 8
+		else:
+			print("Not T2 Q/S")
+			return
+
+		print(f"Image dimens raw: {width}x{height}")
+		# if width==16728 and height==16728:
+		# 	width=344
+		# 	height=344
+		if width>6000:
+			mask = 0x01FF
+			width = width & mask
+			height = height & mask
+			print(f"Image dimens bit masked: {width}x{height}")
+
+		if width % width_align:
+			width += width_align-width%width_align
+		print(f"Image dimens aligned: {width}x{height}")
 
 		print(f"Pixel ct: {width*height}")
 
@@ -81,13 +100,6 @@ def t2_convert(in_path):
 		print(f"Header t1: {t1}")
 		print(f"Header t2: {t2}")
 
-		if t1 == 81: #'Q'
-			palette_size = 16 #4bpp
-		elif t1 == 83: #'S'
-			palette_size = 256 #8bpp
-		else:
-			print("Not T2 Q/S")
-			return
 
 		print(f"Palette size: {str(palette_size)} colors")
 

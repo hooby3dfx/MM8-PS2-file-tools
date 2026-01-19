@@ -1,5 +1,6 @@
 import struct, os, sys
 import zlib
+import argparse
 
 #layout for LDZ file:
 #
@@ -58,6 +59,9 @@ def extract(path, outdir):
         print(f"Parsed {len(entries)} valid entries")
         print(entries)
 
+        if not outdir:
+            return
+
         os.makedirs(outdir + "/enc", exist_ok=True)
         os.makedirs(outdir + "/raw", exist_ok=True)
         os.makedirs(outdir + "/utf8", exist_ok=True)
@@ -90,4 +94,24 @@ def extract(path, outdir):
 
 if __name__ == "__main__":
     # extract("TEXT.LDZ", "out")
-    extract(sys.argv[1], sys.argv[2])
+    # extract(sys.argv[1], sys.argv[2])
+
+    parser = argparse.ArgumentParser(
+                    prog='ProgramName',
+                    description='Parses and Extracts FCAT/LDZ files',
+                    epilog='Have a nice day!')
+
+    parser.add_argument('filename') #LDZ file to be extracted
+    parser.add_argument('-o', '--outpath')#, action='store_true') #output path for extraction
+
+    args = parser.parse_args()
+
+    if args.outpath:
+        extract(args.filename, args.outpath)
+
+    else:
+        extract(args.filename, None)
+
+
+
+

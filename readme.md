@@ -106,6 +106,9 @@ PBP.STR
 
 Image files in ICONSJ.LDZ:
 T_cred_up
+T_new_up
+T_load_up
+
 
 
 
@@ -123,28 +126,6 @@ Palette/CLUT data
 ...
 Pixel index data
 ...
-
-
-
-examples: 
-fname		header	dimens		pixel_ct	fsize			bpp			psize	CLUT storage	
-bt_loadH;	T2Q14;	106x37;		3922 px;	fsize 2160		//4bpp?		16
-air1;		T2Q14;	100x100;	10000 px;	fsize 5680		//4bpp?
-loading1;	T2S13;	640x448; 	286720 px;	fsize 287760	//8bpp		256		PAL_RGB32_CSM1
-ARCOBG;		T21313;	640x480;	307200 px;	fsize 308240	//8bpp				PAL_RGB32_CSM1
-
-
-ICONSJ.LDZ
-	bt_loadU
-		pos 17090A00	657687
-		cs 32050000		1330
-		us 70080000		2160
-		dd if=bmpt2out_z of=ICONSJ_NEW.LDZ bs=1 count=1330 seek=657687 conv=notrunc
-	T_cred_up
-		pos 74770501	17135476
-		cs 120D0000		3346
-		us 10120000		4624
-		dd if=bmpt2out_z of=ICONSJ_NEW.LDZ bs=1 count=3346 seek=17135476 conv=notrunc
 
 
 

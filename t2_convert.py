@@ -161,7 +161,7 @@ def convert_bmp_to_t2(t2_path, bmp_path):
 	# Get the palette (returns a flat list [R,G,B,R,G,B...])
 	if img.mode == 'P':
 
-		colors = 256 #16
+		colors = 16 #16 or 256
 
 		# palette_og = img.getpalette()
 		
@@ -179,43 +179,53 @@ def convert_bmp_to_t2(t2_path, bmp_path):
 			# colors=16: The target number of colors
 			# method=2: Uses the 'libimagequant' (high quality) if available, or median cut
 			# dither=1: Keeps transitions smooth (set to 0 for flat colors)
+
+			# method=1 results in better compression (if needed)
 			image_bpp = img.quantize(colors=16, method=2, dither=1)
+			# image_bpp = img.quantize(colors=16, method=1, dither=1)
 		else:
 			image_bpp = img
 			
 
 		palette = image_bpp.getpalette()
 		
-		pixel_indexes = list(image_bpp.getdata())
+		# pixel_indexes = list(image_bpp.getdata())
 
 		#PS2 "RGB8888" format
-		ps2_palette = []
+		ps2_palette_list = []
 		for i in range(colors):
 			ix=i*3
 			r = palette[ix+0]
 			g = palette[ix+1]
 			b = palette[ix+2]
 			a = 128 #alpha 0x80
-			ps2_palette.append((r,g,b,a))
+			ps2_palette_list.append((r,g,b,a))
 
 		ps2_palette_bytes = bytearray()
-		for color in ps2_palette:
+		for color in ps2_palette_list:
 			ps2_palette_bytes += bytes(color)
 
 		if colors == 256:
 			#swizzle the palette!!!
 			print("swizzling palette... ")
-			ps2_palette = _convert_ps2_palette(ps2_palette_bytes, 32)
+			ps2_palette_bytes = _convert_ps2_palette(ps2_palette_bytes, 32)
 
 
 		print("ps2_palette:")
-		print(ps2_palette)
+		print(ps2_palette_list)
 
 
 		# canvas_width = 112
 		# canvas_height = 37
-		canvas_width = 112
-		canvas_height = 32
+		# size for title screen icons
+		# canvas_width = 112
+		# canvas_height = 32
+		# size for status menu icons
+		# canvas_width = 80
+		# canvas_height = 26
+		# size for system menu icons
+		canvas_width = 224
+		canvas_height = 64
 
 		canvas = Image.new('P', (canvas_width, canvas_height))
 		canvas.putpalette(palette)#needed??
@@ -239,7 +249,7 @@ def convert_bmp_to_t2(t2_path, bmp_path):
 			t2_blob = bytearray()
 			
 			t2_blob += t2header
-			t2_blob += ps2_palette
+			t2_blob += ps2_palette_bytes
 			indices_8bpp = bytes(canvas.getdata())
 			# print(list(canvas.getdata()))
 
@@ -253,7 +263,8 @@ def convert_bmp_to_t2(t2_path, bmp_path):
 					# print(p2)
 
 					# Pack p1 into the high nibble and p2 into the low nibble
-					packed_byte = (p1 << 4) | (p2 & 0x0F)
+					# packed_byte = (p1 << 4) | (p2 & 0x0F)
+					packed_byte = (p2 << 4) | (p1 & 0x0F)
 					# print(packed_byte)
 					t2_blob.append(packed_byte)
 			else:

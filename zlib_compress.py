@@ -6,14 +6,14 @@ def compress(in_path, out_path, target_size=None):
     with open(in_path, "rb") as in_f:
         data = in_f.read()
 
-        #See Z_BEST_SPEED (1), 
+        #See 
+        #Z_BEST_SPEED (1), 
         #Z_BEST_COMPRESSION (9), 
         #Z_NO_COMPRESSION (0),
-        #Z_DEFAULT_COMPRESSION (-1) for more information about these values.
+        #Z_DEFAULT_COMPRESSION (-1) 
+        #for more information about these values.
 
         comp = zlib.compress(data, level=zlib.Z_BEST_COMPRESSION)
-
-        
 
         with open(out_path, "wb") as out_f:
             out_f.write(comp)

@@ -67,15 +67,23 @@ def t2_convert(in_path):
 		t1, t2 = struct.unpack_from("<BB", header, 2)
 
 		# raw = f.read()
+		print(header[0])
+		print(header[1])
+		print(t1)
+		print(t2)
 
-		if t1 == 81: #'Q'
+		if header[0] != 84 or header[1] != 50: #T2
+			print("Not T2 file")
+			return
+
+		if t2 == 20: #0x14, usually 'T2Q'
 			palette_size = 16 #4bpp
 			width_align = 16
-		elif t1 == 83: #'S'
+		elif t2 == 19: #0x13, usually 'T2S'
 			palette_size = 256 #8bpp
 			width_align = 8
 		else:
-			print("Not T2 Q/S")
+			print("Unknown T2 bpp")
 			return
 
 		print(f"Image dimens raw: {width}x{height}")
@@ -157,11 +165,26 @@ def t2_convert(in_path):
 def convert_bmp_to_t2(t2_path, bmp_path):
 
 	img = Image.open(bmp_path)
+	#number of colors for output palette
+	colors = 256 #16 or 256
+	#dimensions of output image
+	# canvas_width = 112
+	# canvas_height = 37
+	# size for title screen icons
+	# canvas_width = 112
+	# canvas_height = 32
+	# size for status menu icons
+	# canvas_width = 80
+	# canvas_height = 26
+	# size for system menu icons
+	# canvas_width = 224
+	# canvas_height = 64
+	canvas_width = 960
+	canvas_height = 2500
 
-	# Get the palette (returns a flat list [R,G,B,R,G,B...])
-	if img.mode == 'P':
 
-		colors = 16 #16 or 256
+	if img.mode == 'P' and colors == 256:
+		# if input bmp uses palette and we want 256 color palette, we can reuse it
 
 		# palette_og = img.getpalette()
 		
@@ -173,7 +196,10 @@ def convert_bmp_to_t2(t2_path, bmp_path):
 
 		# print("bmp pixel_indexes:")
 		# print(pixel_indexes)
-
+		print("using bmp file palette")
+		image_bpp = img
+	else:
+		# otherwise we will define the palette here
 		if colors == 16:
 			# Quantize to 16 colors
 			# colors=16: The target number of colors
@@ -182,99 +208,88 @@ def convert_bmp_to_t2(t2_path, bmp_path):
 
 			# method=1 results in better compression (if needed)
 			image_bpp = img.quantize(colors=16, method=2, dither=1)
-			# image_bpp = img.quantize(colors=16, method=1, dither=1)
 		else:
-			image_bpp = img
-			
+			# Quantize to 256 colors
+			image_bpp = img.quantize(colors=256, method=1, dither=1)
 
-		palette = image_bpp.getpalette()
+	
+	# Get the bmp palette (returns a flat list [R,G,B,R,G,B...])
+	palette = image_bpp.getpalette()
+	
+	# pixel_indexes = list(image_bpp.getdata())
+
+	#PS2 "RGB8888" format
+	ps2_palette_list = []
+	for i in range(colors):
+		ix=i*3
+		r = palette[ix+0]
+		g = palette[ix+1]
+		b = palette[ix+2]
+		a = 128 #alpha 0x80
+		ps2_palette_list.append((r,g,b,a))
+
+	ps2_palette_bytes = bytearray()
+	for color in ps2_palette_list:
+		ps2_palette_bytes += bytes(color)
+
+	if colors == 256:
+		#swizzle the palette!!!
+		print("swizzling palette... ")
+		ps2_palette_bytes = _convert_ps2_palette(ps2_palette_bytes, 32)
+
+
+	print("ps2_palette:")
+	print(ps2_palette_list)
+
+
+	canvas = Image.new('P', (canvas_width, canvas_height))
+	canvas.putpalette(palette)#needed??
+	canvas.paste(image_bpp, (0, 0))
+
+	canvas.save(f'bmp-{colors}-out.bmp')
+	
+	#create T2:
+	#header:
+	#	T2XX
+	#	padding
+	#	dimens
+	#palette
+	#indexes
+	#file size and properties must match the original T2
+
+	#basic approach - surgically insert the bytes from provided bmp into the T2 
+	#for palette & pixel indexes
+	with open(t2_path, "rb") as tf:
+		t2header = tf.read(16)
+		t2_blob = bytearray()
 		
-		# pixel_indexes = list(image_bpp.getdata())
+		t2_blob += t2header
+		t2_blob += ps2_palette_bytes
+		indices_8bpp = bytes(canvas.getdata())
+		# print(list(canvas.getdata()))
 
-		#PS2 "RGB8888" format
-		ps2_palette_list = []
-		for i in range(colors):
-			ix=i*3
-			r = palette[ix+0]
-			g = palette[ix+1]
-			b = palette[ix+2]
-			a = 128 #alpha 0x80
-			ps2_palette_list.append((r,g,b,a))
+		if colors == 16:
+			for i in range(0, len(indices_8bpp), 2):
+				p1 = indices_8bpp[i]
+				# Handle odd-numbered total pixels by using 0 as a placeholder
+				p2 = indices_8bpp[i+1] if (i+1) < len(indices_8bpp) else 0
+				
+				# print(p1)
+				# print(p2)
 
-		ps2_palette_bytes = bytearray()
-		for color in ps2_palette_list:
-			ps2_palette_bytes += bytes(color)
-
-		if colors == 256:
-			#swizzle the palette!!!
-			print("swizzling palette... ")
-			ps2_palette_bytes = _convert_ps2_palette(ps2_palette_bytes, 32)
-
-
-		print("ps2_palette:")
-		print(ps2_palette_list)
-
-
-		# canvas_width = 112
-		# canvas_height = 37
-		# size for title screen icons
-		# canvas_width = 112
-		# canvas_height = 32
-		# size for status menu icons
-		# canvas_width = 80
-		# canvas_height = 26
-		# size for system menu icons
-		canvas_width = 224
-		canvas_height = 64
-
-		canvas = Image.new('P', (canvas_width, canvas_height))
-		canvas.putpalette(palette)#needed??
-		canvas.paste(image_bpp, (0, 0))
-
-		canvas.save(f'bmp-{colors}-out.bmp')
+				# Pack p1 into the high nibble and p2 into the low nibble
+				# packed_byte = (p1 << 4) | (p2 & 0x0F)
+				packed_byte = (p2 << 4) | (p1 & 0x0F)
+				# print(packed_byte)
+				t2_blob.append(packed_byte)
+		else:
+			t2_blob += indices_8bpp
 		
-		#create T2:
-		#header:
-		#	T2XX
-		#	padding
-		#	dimens
-		#palette
-		#indexes
-		#file size and properties must match the original T2
 
-		#basic approach - surgically insert the bytes from provided bmp into the T2 
-		#for palette & pixel indexes
-		with open(t2_path, "rb") as tf:
-			t2header = tf.read(16)
-			t2_blob = bytearray()
-			
-			t2_blob += t2header
-			t2_blob += ps2_palette_bytes
-			indices_8bpp = bytes(canvas.getdata())
-			# print(list(canvas.getdata()))
-
-			if colors == 16:
-				for i in range(0, len(indices_8bpp), 2):
-					p1 = indices_8bpp[i]
-					# Handle odd-numbered total pixels by using 0 as a placeholder
-					p2 = indices_8bpp[i+1] if (i+1) < len(indices_8bpp) else 0
-					
-					# print(p1)
-					# print(p2)
-
-					# Pack p1 into the high nibble and p2 into the low nibble
-					# packed_byte = (p1 << 4) | (p2 & 0x0F)
-					packed_byte = (p2 << 4) | (p1 & 0x0F)
-					# print(packed_byte)
-					t2_blob.append(packed_byte)
-			else:
-				t2_blob += indices_8bpp
-			
-
-			outpath = 'bmpt2out'
-			with open(outpath, "wb") as of:
-				of.write(t2_blob)
-				print("Saved "+outpath)
+		outpath = 'bmpt2out'
+		with open(outpath, "wb") as of:
+			of.write(t2_blob)
+			print("Saved "+outpath)
 
 
 if __name__ == "__main__":

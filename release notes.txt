@@ -1,0 +1,57 @@
+
+=v0.5 Release Notes=
+- Translated Arcomage mini game
+- Fixed issue with history text, autonote text, starting area names, some npctext
+Not translated yet:
+- UI text embedded in some buttons and character creation
+- Pause menu item descriptions
+- Some of the NPC text in beginning areas
+Known issues:
+- Line wrapping
+- For buttons that are translated, only the “up”/unpressed state will be in English
+
+
+=v0.4 Release Notes=
+- Fixed quest descriptions appearing on data screen
+- Translated system menu images
+Not translated yet:
+- UI text embedded in some buttons and character creation
+- Pause menu item descriptions
+- Some of the NPC text in beginning areas
+- For buttons that are translated, only the “up”/unpressed state will be in English
+Known issues:
+- Line wrapping
+- Sporadic text glitches
+
+
+=v0.3 Release Notes=
+- Fixed save game not working!
+- Translated menu menu images
+Not translated yet:
+- UI text embedded in images
+- Some of the NPC text in beginning areas
+Known issues:
+- Line wrapping
+- Sporadic text glitches
+
+
+=v0.2 Release Notes=
+Not translated yet:
+- UI text embedded in images
+- Some of the NPC text in beginning areas
+Known issues:
+- Line wrapping
+- Sporadic text glitches
+- Save game not working! (Will be fixed in next release!)
+To apply the translation, use the xdelta on the iso image. 
+
+
+=v0.1 Release Notes=
+Not translated yet:
+- UI text
+- Specific object interactions like hovering over tree, well, some doors
+Known issues:
+- Line wrapping
+- Sporadic text glitches
+To apply the translation, edit the ISO file with Apache and replace DATA/TEXT.LDZ
+

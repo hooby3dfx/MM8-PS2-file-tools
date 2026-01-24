@@ -116,6 +116,18 @@ Files touched:
 	T_cred_up
 	T_new_up
 	T_load_up
+	bt_newU
+	bt_quitU
+	bu_loadU
+	bu_rtrnU
+	bu_saveU
+	But20U
+	but21U
+	but22U
+	but23U
+	but24U
+	but25U
+	but26U
 
 /DATA/ARCOSPR.LDZ
 	Sprite sheet for Arcomage mini game

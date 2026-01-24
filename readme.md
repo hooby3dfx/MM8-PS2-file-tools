@@ -3,7 +3,7 @@ Basic tools for extracting and then rebuilding LDZ / FCAT file used by MM8 on PS
 Most of the original text seems to be encoded as cp932 with windows CRLF line endings, and sometimes just LF is used for formatting.
 
 Files touched:
-
+```
 /SLPS_250.31
 	This is the game binary in elf format, with some embedded strings
 
@@ -131,10 +131,10 @@ Files touched:
 
 /DATA/ARCOSPR.LDZ
 	Sprite sheet for Arcomage mini game
+```
 
 
-
-
+```
 T2XX image format
 16 byte header?
 	T 2 _ _ (magic number)
@@ -147,17 +147,18 @@ Palette/CLUT data
 ...
 Pixel index data
 ...
-
+```
 
 
 Useful tools:
-Apache 2 for inserting files into ISO
-MMArchive to view the Windows MM8 LOD data files
-ImHex hex editor
-Notepad++ for editing text files (supports Shift-JIS encoding)
-Wally for editing palette images
-Kuriimu2 for viewing/understanding raw images
-DeltaPatcher for creating patch/diff
+
+- Apache 2 for inserting files into ISO
+- MMArchive to view the Windows MM8 LOD data files
+- ImHex hex editor
+- Notepad++ for editing text files (supports Shift-JIS encoding)
+- Wally for editing palette images
+- Kuriimu2 for viewing/understanding raw images
+- DeltaPatcher for creating patch/diff
 
 
 
